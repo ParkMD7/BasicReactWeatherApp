@@ -1,25 +1,51 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import SeasonDisplay from './SeasonDisplay';
+import Loader from './Loader';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+
+  state = {
+    lat: null,
+    long: null,
+    errMessage: '',
+  };
+
+  componentDidMount() {
+    window.navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.setState({
+          lat: position.coords.latitude,
+          long: position.coords.longitude
+        });
+      },
+      (err) => this.setState({ errMessage: err.message })
+    )
+  }
+
+  renderContent() {
+    if (this.state.errMessage && !this.state.lat) {
+      return <div><h1>User Blocked Location</h1></div>
+    }
+
+    if (!this.state.errMessage && this.state.lat) {
+      return (
+        <SeasonDisplay
+          lat={this.state.lat}
+          long={this.state.long}
+          err={this.state.error}
+        />
+      )
+    }
+    return <Loader message={"Please accept location request"}/>
+  }
+
+  render() {
+    return (
+      <div>
+        {this.renderContent()}
+      </div>
+    )
+  }
 }
 
 export default App;
